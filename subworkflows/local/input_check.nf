@@ -20,7 +20,7 @@ workflow INPUT_CHECK {
 
     emit:
     bam_files = bam_files                 // channel: [ val(meta), [ bams ] ]
-    versions = ch_versions // channel: [ versions.yml ]
+    versions = ch_versions               // channel: [ versions.yml ]
 }
 
 // Function to get list of [ meta, [ tumorBam, normalBam, assay, normalType ] ]
@@ -39,19 +39,6 @@ def create_bam_channel(LinkedHashMap row) {
     }
     if (!file(row.normalBam).exists()) {
         exit 1, "ERROR: Please check input samplesheet -> Normal BAM file does not exist!\n${row.normalBam}"
-    }
-
-    row_bedfile = row.bedFile.trim()
-    if(row_bedfile && row_bedfile != "null" && row_bedfile != "NONE") {
-        if (!file(row_bedfile).exists()) {
-            exit 1, "ERROR: Please check input samplesheet -> Bed file does not exist!\n${row.bedFile}"
-        }
-
-        bedFile = file(row_bedfile)
-    }
-
-    if(!(meta.assay in params.impact_assay_info.keySet())){
-        exit 1, "ERROR: Please check input assay -> Coverage value not found in config\n${params.impact_assay_info.keySet()}"
     }
 
     def tumorBai = "${row.tumorBam}.bai"
@@ -87,6 +74,6 @@ def create_bam_channel(LinkedHashMap row) {
     }
 
 
-    bams = [ meta, [ file(row.tumorBam), file(row.normalBam) ], [ file(foundTumorBai), file(foundNormalBai) ], bedFile ]
+    bams = [ meta, [ file(row.tumorBam), file(row.normalBam) ], [ file(foundTumorBai), file(foundNormalBai) ]]
     return bams
 }
